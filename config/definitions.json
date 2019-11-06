@@ -1,0 +1,49 @@
+{
+    "ILoggerSchema" : {
+        "Levels" : {
+            "Info" : 1,
+            "Debug" : 2,
+            "Verbose" : 3
+        },
+        "Severity" : {
+            "Normal": 1,
+            "Warning": 2,
+            "Error": 3,
+            "Fatal" : 4
+        },
+        "Definitions": {
+            "Initialization": "ILogger was successfully initiated and configured for database ({0}).",
+            "Warning": "{0} was flagged as a warning. Details: {1}"
+        }
+    },
+
+    "EventSchema" : {
+        "Modules": {
+            "ReportAutomation": 1,
+            "UPSAssistant": 2
+        },
+        "Action": {
+            "Routine": 1,
+            "Unplanned": 2
+        },
+        "Types": {
+            "Insert": 0,
+            "Update": 1,
+            "Delete": 2,
+            "Purge": 3
+        },
+        "Definitions": {
+            "OnLoad" : "Sucessfully loaded environmental configuration and built handlers.",
+            "InsertRecord": "EventRecord({0}) was successfully processed and inserted into EventLog.",
+            "DeleteRecord": "EventRecord({0}) was successfully processed and removed from the EventLog.",
+            "UpdateRecord": "EventRecord({0}) was successfully processed and updated within the EventLog.",
+            "ParseRecord" : "EventRecord({0}) was successfully processed and parsed within the EventLog.",
+            "PurgeRecord" : "EventRecord({0}) was successfully processed and purged within the EventLog.",
+            "CleanThreads": "EventRecord({0}) was successfully processed and cleaning threads took {1} {2} to complete.",
+            "ObjectUnload": "EventRecord({0}) was successfully unloaded, cleaned, and processed.",
+            "TaskEventNotification": "EventRecord({0}) was processed as a notification --> updated TaskMaster active status for taskID: {1}.",
+            "ReportEventNotification": "EventRecord({0}) was processed as a report routine --> updated ReportMaster status for ReportID: {1}.",
+            "ReportDeliveredNotification": "EventRecord({0}) was process as a delivery notification --> sent email thread to distroGroupID : {1}."
+        }
+    }
+}

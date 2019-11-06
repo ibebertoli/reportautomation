@@ -1,0 +1,11 @@
+{
+    "applicationID": 2,
+    "scriptVersion": 1.2,
+    "database" : {
+        "server": "localhost",
+        "ip": "127.0.0.0",
+        "database" : "UPSAssistant",
+        "user" : "",
+        "password" : ""
+    }
+}
