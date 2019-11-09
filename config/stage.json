@@ -7,5 +7,6 @@
         "database" : "UPSAssistant",
         "user" : "",
         "password" : ""
-    }
+    },
+    "reportDropLocation" : ".\\dump"
 }

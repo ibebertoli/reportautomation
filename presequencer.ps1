@@ -32,7 +32,7 @@ $LocalConfiguration.BuildObject(".\config\",
 # Initialize database handler
 # Arguments ::new(HostName, DatabaseName)
 $DatabaseHandler = [DatabaseHandler]::new($LocalConfiguration.RootObject.Database.Server, 
-                                   $LocalConfiguration.RootObject.Database.Database)
+                                          $LocalConfiguration.RootObject.Database.Database)
 
 # Schemed definitions for events and iLogger
 $DefinitionSchema = Get-Content ".\config\definitions.json" -Force -Raw | ConvertFrom-Json -Verbose
@@ -51,7 +51,7 @@ catch {
 # Start VersionDiscrepancyCheck event
 # Arguments : Events(EventModule, EventAction, EventType, EventText)
 $DatabaseHandler.Events($DefinitionSchema.EventSchema.Modules.ReportAutomation, 
-                        $DefinitionSchema.EventSchema.Actions.Routine,
+                        $DefinitionSchema.EventSchema.Action.Routine,
                         $DefinitionSchema.EventSchema.Types.Insert,
                        ($DefinitionSchema.EventSchema.Definitions.InsertRecord -f "VersionDiscrepancyCheck"))
 
@@ -74,19 +74,51 @@ else
 
     # Log to database that the versions are out-of-sync and defaulting to local configuration
     $DatabaseHandler.ILogger($DefinitionSchema.ILoggerSchema.Levels.Info, 
-                         $DefinitionSchema.ILoggerSchema.Severity.Warning, 
-                        ($DefinitionSchema.ILoggerSchema.Definitions.Warning -f ("VersionDiscrepancyCheck", "There were version discrepancies between local and remote - (Local : $masterVersion ; Remote : $($_remoteVersion.Value). Defaulting to the LocalConfiguration : ($masterVersion)")))
+                             $DefinitionSchema.ILoggerSchema.Severity.Warning, 
+                            ($DefinitionSchema.ILoggerSchema.Definitions.Warning -f ("VersionDiscrepancyCheck", "There were version discrepancies between local and remote - (Local : $masterVersion ; Remote : $($_remoteVersion.Value). Defaulting to the LocalConfiguration : ($masterVersion)")))
 }
 
 # Fetch the list of active reports for this routine session
-$ReportHandler = $DatabaseHandler.ListReports()
+$ReportHandler = [ReportHandler]::new()
+$ReportCatalog = $DatabaseHandler.ListReports()
 
+foreach ($report in $ReportCatalog)
+{
+    try 
+    {    # [string]$ReportShortName, [string]$ReportOutputType, [string]$ReportOutputLocation, [object]$RootObject
+        $reportContextName = $ReportHandler.ConstructReportFile($report.ReportShortName, 
+                                                                $report.ReportOutputType, 
+                                                                "$($LocalConfiguration.RootObject.ReportDropLocation)\$($report.ReportShortName)\", 
+                                                                $DatabaseHandler.RawQuery("SELECT * from sys.tables")) #todo :update rawQuery() context
+
+        # Add event
+        $DatabaseHandler.Events($DefinitionSchema.EventSchema.Modules.ReportAutomation, 
+                                $DefinitionSchema.EventSchema.Action.Routine,
+                                $DefinitionSchema.EventSchema.Types.Insert,
+                               ($DefinitionSchema.EventSchema.Definitions.InsertRecord -f "ReportExecution($($report.ReportShortName))"))
+
+        # Add report history
+        $DatabaseHandler.InsertRecordReportHistory($report.ReportShortName,
+                                                   $reportContextName, 
+                                                   $DefinitionSchema.ReportSchema.Status.Complete)
+    }
+    catch 
+    {
+        $DatabaseHandler.ILogger($DefinitionSchema.ILoggerSchema.Levels.Info, 
+                                 $DefinitionSchema.ILoggerSchema.Severity.Error, 
+                                ($DefinitionSchema.ILoggerSchema.Definitions.Error -f ("InsertRecordReportHistory()", $Error[0].Exception.Message)))
+
+        $DatabaseHandler.InsertRecordReportHistory($report.ReportShortName,
+                                                   $reportContextName, 
+                                                   $DefinitionSchema.ReportSchema.Status.ErrorState)
+    }
+}
 
 # Start routine
 
 # Validate routine
 
-# End routiner
+# End routine
 
 # Send confirmation
 

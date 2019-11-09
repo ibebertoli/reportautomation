@@ -13,7 +13,8 @@
         },
         "Definitions": {
             "Initialization": "ILogger was successfully initiated and configured for database ({0}).",
-            "Warning": "{0} was flagged as a warning. Details: {1}"
+            "Warning": "{0} was flagged as a warning. Details: {1}",
+            "Error" : "Error processing {0}. Details : {1}."
         }
     },
 
@@ -34,16 +35,25 @@
         },
         "Definitions": {
             "OnLoad" : "Sucessfully loaded environmental configuration and built handlers.",
-            "InsertRecord": "EventRecord({0}) was successfully processed and inserted into EventLog.",
-            "DeleteRecord": "EventRecord({0}) was successfully processed and removed from the EventLog.",
-            "UpdateRecord": "EventRecord({0}) was successfully processed and updated within the EventLog.",
-            "ParseRecord" : "EventRecord({0}) was successfully processed and parsed within the EventLog.",
-            "PurgeRecord" : "EventRecord({0}) was successfully processed and purged within the EventLog.",
-            "CleanThreads": "EventRecord({0}) was successfully processed and cleaning threads took {1} {2} to complete.",
-            "ObjectUnload": "EventRecord({0}) was successfully unloaded, cleaned, and processed.",
-            "TaskEventNotification": "EventRecord({0}) was processed as a notification --> updated TaskMaster active status for taskID: {1}.",
-            "ReportEventNotification": "EventRecord({0}) was processed as a report routine --> updated ReportMaster status for ReportID: {1}.",
-            "ReportDeliveredNotification": "EventRecord({0}) was process as a delivery notification --> sent email thread to distroGroupID : {1}."
+            "InsertRecord": "EventRecord( {0} ) was successfully processed and inserted into EventLog.",
+            "DeleteRecord": "EventRecord( {0} ) was successfully processed and removed from the EventLog.",
+            "UpdateRecord": "EventRecord( {0} ) was successfully processed and updated within the EventLog.",
+            "ParseRecord" : "EventRecord( {0} ) was successfully processed and parsed within the EventLog.",
+            "PurgeRecord" : "EventRecord( {0} ) was successfully processed and purged within the EventLog.",
+            "CleanThreads": "EventRecord( {0} ) was successfully processed and cleaning threads took {1} {2} to complete.",
+            "ObjectUnload": "EventRecord( {0} ) was successfully unloaded, cleaned, and processed.",
+            "TaskEventNotification": "EventRecord( {0} ) was processed as a notification --> updated TaskMaster active status for taskID: {1}.",
+            "ReportEventNotification": "EventRecord( {0} ) was processed as a report routine --> updated ReportMaster status for ReportID: {1}.",
+            "ReportDeliveredNotification": "EventRecord( {0} ) was process as a delivery notification --> sent email thread to distroGroupID : {1}."
+        }
+    },
+
+    "ReportSchema" : {
+        "Status" : {
+            "Inactive": 0,
+            "InProgress": 1,
+            "Complete" : 2,
+            "ErrorState" : 3
         }
     }
 }
