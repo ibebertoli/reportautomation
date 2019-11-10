@@ -58,3 +58,10 @@ function Update-ScriptEnvironment([string]$PathToEnvironment, [string]$Environme
         return $Error[0].Exception.Message
     }
 }
+
+function StandardDateTimeFormat
+{
+    $date = Get-Date -Format "yyyyMMdd hh:mm:ss:ms"
+
+    return $date
+}

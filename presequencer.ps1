@@ -60,7 +60,9 @@ $DatabaseHandler.Events($DefinitionSchema.EventSchema.Modules.ReportAutomation,
 $RemoteConfiguration = $DatabaseHandler.GetConfig($LocalConfiguration.RootObject.ApplicationID)
 
 # Sort object by ValueName
-$_remoteVersion = $RemoteConfiguration | Where-Object { $_.ValueName -eq "Version" }
+# update this chaos... 
+$_remoteVersion  = $RemoteConfiguration | Where-Object { $_.ValueName -eq "Version" }
+$_rootDirectory  = $RemoteConfiguration | Where-Object { $_.ValueName -eq "RootDirectory"}
 
 # See if the versions match
 if ($LocalConfiguration.Version() -eq $_remoteVersion.Value)
@@ -82,14 +84,18 @@ else
 $ReportHandler = [ReportHandler]::new()
 $ReportCatalog = $DatabaseHandler.ListReports()
 
+# Construct full drop location strings
+$ReportHandler.SetupDropLocations($_rootDirectory.Value,
+                                  $DefinitionSchema.ReportSchema.SubDirectories)
+
 foreach ($report in $ReportCatalog)
 {
     try 
     {    # [string]$ReportShortName, [string]$ReportOutputType, [string]$ReportOutputLocation, [object]$RootObject
         $reportContextName = $ReportHandler.ConstructReportFile($report.ReportShortName, 
                                                                 $report.ReportOutputType, 
-                                                                "$($LocalConfiguration.RootObject.ReportDropLocation)\$($report.ReportShortName)\", 
-                                                                $DatabaseHandler.RawQuery("SELECT * from sys.tables")) #todo :update rawQuery() context
+                                                                $ReportHandler.GetDropLocation($report.ReportShortName), 
+                                                                $DatabaseHandler.RawQuery("SELECT * from sys.tables")) #todo :update rawQuery() context from ARC
 
         # Add event
         $DatabaseHandler.Events($DefinitionSchema.EventSchema.Modules.ReportAutomation, 
@@ -98,18 +104,20 @@ foreach ($report in $ReportCatalog)
                                ($DefinitionSchema.EventSchema.Definitions.InsertRecord -f "ReportExecution($($report.ReportShortName))"))
 
         # Add report history
-        $DatabaseHandler.InsertRecordReportHistory($report.ReportShortName,
-                                                   $reportContextName, 
+        $DatabaseHandler.InsertRecordReportHistory($reportContextName,
+                                                   $ReportHandler.GetDropLocation($report.ReportShortName), 
                                                    $DefinitionSchema.ReportSchema.Status.Complete)
     }
     catch 
     {
+        # Catch ExecuteReader() exception and write it to the ILogger
         $DatabaseHandler.ILogger($DefinitionSchema.ILoggerSchema.Levels.Info, 
                                  $DefinitionSchema.ILoggerSchema.Severity.Error, 
                                 ($DefinitionSchema.ILoggerSchema.Definitions.Error -f ("InsertRecordReportHistory()", $Error[0].Exception.Message)))
 
-        $DatabaseHandler.InsertRecordReportHistory($report.ReportShortName,
-                                                   $reportContextName, 
+        # Catch ExecuteReader() exception and update the report state as error state
+        $DatabaseHandler.InsertRecordReportHistory($reportContextName,
+                                                   $ReportHandler.GetDropLocation($report.ReportShortName), 
                                                    $DefinitionSchema.ReportSchema.Status.ErrorState)
     }
 }

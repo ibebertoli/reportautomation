@@ -54,6 +54,7 @@
             "InProgress": 1,
             "Complete" : 2,
             "ErrorState" : 3
-        }
+        },
+        "SubDirectories" : ["AdminReports","CFOps","Costco_CFScorecard","DailyScripts","Employee","Fulfillment", "ITL"]
     }
 }

@@ -433,4 +433,69 @@ class DatabaseHandler
 
     }
 
+    # Insert into Reporthistory table
+    #ReportFileContextName	
+        # ReportOutputPath		
+        # ReportStatus			
+        # ReportCompletionDateTime
+        
+    [void]InsertRecordReportHistory([string]$ReportFileContextName, [string]$ReportOutputPath, [int]$ReportStatus)
+    {
+
+        if ($this.ConnectionString)
+        {
+            $ReportHistoryConnectionString = $this.ConnectionString
+        }
+        else
+        {
+            $ReportHistoryConnectionString = "Server=$($this.SQLServer);Database=$($this.Database);Integrated Security=SSPI;Connection Timeout=$($this.ConnectionTimeout)"
+        }
+
+        $ReportHistorySQLConnection = [System.Data.SqlClient.SqlConnection]::new()
+        $ReportHistorySQLConnection.ConnectionString = $ReportHistoryConnectionString
+
+        try
+        {
+            $ReportHistorySQLConnection.Open()
+        }
+        catch
+        {
+            throw $Error[0].Exception.Message   
+        }
+
+        try
+        {
+            $ReportHistoryQuery = "EXEC sp_ReportHistoryAddRecord '{0}', '{1}', {2}" -f ($ReportFileContextName, 
+                                                                                         $ReportOutputPath, 
+                                                                                         $ReportStatus)
+            
+            $ReportHistorySQLCommand = $ReportHistorySQLConnection.CreateCommand()
+            $ReportHistorySQLCommand.CommandText = $ReportHistoryQuery
+            $ReportHistorySQLCommand.CommandTimeout = $this.CommandTimeout
+            $ReportHistorySQLReader = $ReportHistorySQLCommand.ExecuteReader()
+        }
+        catch
+        {
+            $ReportHistorySQLConnection.Close()
+            $ReportHistorySQLConnection.Dispose()
+            throw $Error[0].Exception.Message          
+        }
+
+        if ($ReportHistorySQLReader)
+        {
+            $this.Tables = [System.Data.DataTable]::new()
+            $this.Tables.Load($ReportHistorySQLReader)
+            $ReportHistorySQLConnection.Close()
+            $ReportHistorySQLConnection.Dispose()
+        }
+
+        if ($this.DisplayResults)
+        {
+            
+        }
+        else
+        {
+        }
+
+    }
 }
